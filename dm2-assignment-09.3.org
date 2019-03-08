@@ -632,6 +632,7 @@ n206
 
 *** Get-A-Gap-Code-Table
 
+
 #+BEGIN_SRC elisp :results silent
 
   ;;;; PSEUDOCODE
@@ -644,9 +645,18 @@ n206
   ;; Add 1's when you go RIGHT,
   ;; GENERATE A BIT STRING FOR EVERY LEAF-NODE (not  (AND ADD TO THE LIST)
 
-  (defun get-a-gap-code-table (htree-root)
-    ""
-    nil)
+  ;using post order traversal (LRV) This is more effecient
+  (defun get-a-gap-code-table (htree-root &rest bit-string)    ;optional bit string param
+      (if (get-left htree-root)                                ;if there is a left child append 0 to bitstring and continue
+          (progn (append bit-string 0)
+                 (get-a-gap-code-table get-left bit-string))) 
+      (if (get-right htree-root)                               ;if there is a right child append 1 to bitstring and continue
+          (progn (append bit-string 1)
+                 (get-a-gap-code-table get-right bit-string)))
+      (make-gap-list bit-string))                              ;put bitstring into table
+
+  (defun make-gap-list (bit-string)                            ;makes list out of bitstrings
+      (setq list (cons list bit-string)))
 
   (let* ((nodes list-of-nodes))
     (loop for node in nodes
@@ -655,6 +665,35 @@ n206
              (symbol-plist node)
              )))
 
+#+END_SRC
+
+#+BEGIN_SRC elisp
+(defun make-internal-node (left-subtree right-subtree)
+   (let* ((new-node (make-node nil (+ (symbol-value left-subtree) (symbol-value right subtree)))))
+    (set-parent left-subtree new-node)
+    (set-parent right-subtree new-node)
+    (set-left new-node left-subtree)
+    (set-right new-node right-subtree)
+    new-node))
+(defun make-huffman-tree (Q)
+   (let (Tl Tr)
+     (while (> (length Q) 1)
+       (setq Tl (first Q)
+             Q (rest Q)
+             Tr (first Q)
+             Q (rest Q)
+             Q (sort (cons (make-internal-node Tl Tr) Q) 'compare-nodes)))
+       (first Q))
+#+END_SRC
+
+#+BEGIN_SRC elisp
+(setq huffman-tree (make-huffman-tree (copy-sequence list-of-nodes)))
+#+END_SRC
+
+#+BEGIN_SRC elisp
+(setq size-binary-in-bits (* 8 32 10000000)
+      size-of-huffman-encoding-in-bits 999957293
+      compression-ratio (compression-ratio size-binary-in-bits size-of-huffman-encoding-in-bits))
 #+END_SRC
 
 -> This is the usage..
@@ -691,6 +730,12 @@ n206
 
 ** Contributors
 
+   - Josh M
+   - Taylor I
+   - Sam T
+   - Dylan D
+   - Anthony L
+   - Benj
    - Grayson
    - Taylor
    - Luke
